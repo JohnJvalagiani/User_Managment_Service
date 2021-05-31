@@ -1,7 +1,7 @@
-﻿using Infrastructure.Configuration;
+﻿using Domain.Entities;
+using Infrastructure.Configuration;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Service.Core.Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -24,10 +24,10 @@ namespace Infrastructure.Data
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
             builder.Entity<AppUser>()
-            .HasOne(a => a.Address)
-            .WithOne(u => u.User)
-            .HasForeignKey<Address>(a => a.UserForeignKey)
-            .OnDelete(DeleteBehavior.SetNull);
+            .HasMany(a => a.Students)
+            .WithOne(u => u.Teacher)
+            .HasForeignKey(a => a.ForeignKey);
+            //.OnDelete(DeleteBehavior.SetNull);
 
         }
     }

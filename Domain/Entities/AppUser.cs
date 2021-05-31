@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Service.Core.Data.Entities;
+﻿using Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace UserService.Core.Models
@@ -10,16 +11,8 @@ namespace UserService.Core.Models
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public DateTime BirthDate { get; set; }
-        public string PersonalNumber { get; set; }
-
-
-        public bool IsMarried { get; set; }
-        public bool IsEmployed { get; set; }
-        public decimal Salary { get; set; }
-
-
-        public Address Address { get; set; }
+        
+        public ICollection<Student> Students { get; set; } = new List<Student>();
 
     }
 }

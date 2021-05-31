@@ -1,0 +1,56 @@
+﻿
+@inject IStudentsService studentservice;
+
+@using Client.Services.Abstraction;
+@using Syncfusion.Blazor.Grids
+@using Dtos;
+@inject Blazored.LocalStorage.ILocalStorageService localStore
+
+@attribute [Authorize]
+
+<AuthorizeView>
+    @*<h1>Hello, @context.User.Identity.Name!</h1>*@
+    <p>You can only see this content if you're authenticated.</p>
+</AuthorizeView>
+
+@if (Students == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>FirstName</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var student in Students)
+            {
+                <tr>
+                    <td><a>@student.FirstName</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+
+@code {
+    const string noteKey = "note";
+
+    private IEnumerable<ReadStudentDto> Students;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var Content = await localStore.GetItemAsync<string>(noteKey);
+
+        Students = await studentservice.GetAllStudent(Content);
+
+    }
+
+
+
+}

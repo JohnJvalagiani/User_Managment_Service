@@ -1,11 +1,12 @@
-﻿using Core.Services;
+﻿using Core.Models;
+using Core.Responses;
+using Core.Services;
 using Core.Services.Abstraction;
 using Dtos;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Service.Core.Data.Entities;
 using Service.Server.Services;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,6 @@ using System.Text;
 using System.Threading.Tasks;
 using UserService.Abstraction;
 using UserService.Core.Models;
-using UserService.Core.Responses;
 
 namespace UserService.Implementation
 {
@@ -27,13 +27,14 @@ namespace UserService.Implementation
         private readonly SignInManager<AppUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly JWTTokenService _jWT;
-        private readonly IRepo _repo;
+        private readonly TokenValidationParameters _tokenValidationPrametrs;
+
         private readonly JwtSettings _jwtSettings;
 
-        public IdentityService(IRepo repo,CurrentUserSupplier currentUserSupplier,JWTTokenService jWt
+        public IdentityService(CurrentUserSupplier currentUserSupplier,JWTTokenService jWt
             ,UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, RoleManager<IdentityRole> roleManager /*JwtSettings jwtSettings*/)
         {
-            this._repo = repo;
+         
             this._currentUserSupplier = currentUserSupplier;
             this._jWT = jWt;
             this._signInManager = signInManager;
@@ -57,6 +58,8 @@ namespace UserService.Implementation
 
             }
 
+
+
             var result = await _userManager.CreateAsync(user, password);
 
             if (!result.Succeeded)
@@ -68,25 +71,27 @@ namespace UserService.Implementation
                 };
             }
 
-            var roleExist = await _roleManager.RoleExistsAsync("default");
-
-            if(!roleExist)
-            {
-                await _roleManager.CreateAsync(new IdentityRole { Name = "default" });
-            }
+            #region
+            //var roleExist = await _roleManager.RoleExistsAsync("default");
+            //if(!roleExist)
+            //{
+            //    await _roleManager.CreateAsync(new IdentityRole { Name = "default" });
+            //}
+            #endregion
 
             await _userManager.AddToRoleAsync(user, "default");
 
-            return await GenerateAuthenicationResultForUser(user);
+              return await _jWT.BuildToken(new UserInfoDTO { EmailAddress = user.Email });
+
         }
 
 
-        public async Task<AuthentificationResult> Login(string user, string password)
+        public async Task<AuthentificationResult> Login(string Email, string password)
         {
 
-            var theuser = await _userManager.FindByEmailAsync(user);
+            var theuser = await _userManager.FindByEmailAsync(Email);
 
-            if (theuser == null)
+             if (theuser == null)
             {
 
                 return new AuthentificationResult
@@ -94,11 +99,11 @@ namespace UserService.Implementation
                     Errors = new string[] { $"Password or Email not correct" }
                 };
             }
-
-          var result = await _signInManager.PasswordSignInAsync(user,password, false,false);
+             
+          var result = await _signInManager.PasswordSignInAsync(Email, password, false,false);
 
             if(result.Succeeded)
-            return await GenerateAuthenicationResultForUser(theuser);
+            return await _jWT.BuildToken(new UserInfoDTO { EmailAddress = theuser.Email });
 
 
             return new AuthentificationResult
@@ -115,18 +120,9 @@ namespace UserService.Implementation
 
             var curUser = await _currentUserSupplier.GetCurrentUser();
 
-            curUser.IsEmployed = appUser.IsEmployed;
-            curUser.IsMarried = appUser.IsMarried;
-            curUser.Salary = appUser.Salary;
-            curUser.PersonalNumber = appUser.PersonalNumber;
             curUser.LastName = appUser.LastName;
             curUser.FirstName = appUser.FirstName;
 
-            Address address = new Address { State = appUser.Address.State, City = appUser.Address.City
-            ,ZipCode= appUser.Address.ZipCode, Country= appUser.Address.Country, Street= appUser.Address.Street
-            };
-
-           await  _repo.Update(address,curUser.Id);
 
             var result=await _userManager.UpdateAsync(curUser);
 
@@ -143,11 +139,75 @@ namespace UserService.Implementation
             return result.Succeeded;
         
         }
+        
         private async Task<AuthentificationResult> GenerateAuthenicationResultForUser(AppUser theuser)
         {
            return  await _jWT.BuildToken(new UserInfoDTO {EmailAddress=theuser.Email});
 
            
         }
+
+        public async Task<AuthentificationResult> RefreshTokenAsync(string token, string refreshToken)
+        {
+
+            var validateToken = GetPrincipalFromToken(token);
+
+            if(validateToken==null)
+            {
+                return new AuthentificationResult {Errors=new[] { "Invalid Token"} };
+            
+            }
+
+            var expiryDateUnix=long.Parse(validateToken.Claims.Single(x=>x.Type==JwtRegisteredClaimNames.Exp).Value);
+
+
+            var expireDateTimeutc = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                .AddSeconds(expiryDateUnix);
+
+
+            if (expireDateTimeutc>DateTime.Now)
+            {
+                return new AuthentificationResult { Errors = new[] { "This Token Hasnt Expirer yet" } };
+
+            }
+            
+
+
+            return null;
+        }
+
+        private ClaimsPrincipal GetPrincipalFromToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            try
+            {
+                var principal = tokenHandler.ValidateToken(token, _tokenValidationPrametrs, out var validationToken);
+
+                if (!IsJwtWithSecurityAlgorithm(validationToken))
+                {
+                    return null;
+                }
+
+                return principal;
+            }
+            catch
+            {
+                return null;
+            }
+
+
+            
+        }
+
+        private bool IsJwtWithSecurityAlgorithm(SecurityToken validatedToken)
+        {
+            return (validatedToken is JwtSecurityToken jwtsecurityToken)
+                && jwtsecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
+                StringComparison.InvariantCultureIgnoreCase);
+
+
+        }
+
     }
 }

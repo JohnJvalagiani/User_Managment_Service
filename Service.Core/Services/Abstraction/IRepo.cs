@@ -1,17 +1,30 @@
-﻿using Service.Core.Data.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using UserService.Core.Models;
 
 namespace Core.Services.Abstraction
 {
-    public interface IRepo
+    public interface IRepo<Tentity> where Tentity : class
     {
+        Task<Tentity> Add(Tentity entity);
+        void AddRangeAsync(IEnumerable<Tentity> entities);
 
-        Task<Address> GetById(object Id);
-        Task<Address> Update(Address Address, object userId);
-        Task<Address> Create(Address address);
+        Task<Tentity> GetById(int Id);
+        Task<IEnumerable<Tentity>> GetAll();
+        Task<IEnumerable<Tentity>> GetByQueryAsync(Expression<Func<Tentity, bool>> predicate = null,
+            Func<IQueryable<Tentity>, IOrderedQueryable<Tentity>> OrderBy = null);
+
+        Task<bool> Remove(int Id);
+        Task<bool> RemoveRange(IEnumerable<Tentity> entities);
+
+        Task<Tentity> Update(Tentity entity);
+
+
+
+
     }
 }

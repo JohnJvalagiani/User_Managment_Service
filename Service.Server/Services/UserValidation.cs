@@ -17,10 +17,6 @@ namespace service.server.Services
             RuleFor(x => x.FirstName).Length(1,250).NotEmpty();
             RuleFor(x => x.Email).EmailAddress().Length(1,250).WithMessage("Please specify a Email").NotEmpty();
             RuleFor(x => x.PhoneNumber).Length(9,12).NotEmpty();
-            RuleFor(x => x.BirthDate).NotEmpty();
-            RuleFor(x => x.Address).NotEmpty();
-            RuleFor(x => x.IsMarried).NotEmpty();
-            RuleFor(x => x.PersonalNumber).Length(11, 11).NotEmpty();
 
         }
 

@@ -28,7 +28,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Dtos\Dtos.csproj" />
     <ProjectReference Include="..\Service.Core\Core.csproj" />
-    <ProjectReference Include="..\UserService.Core\Infrastructure.csproj" />
   </ItemGroup>
 
 

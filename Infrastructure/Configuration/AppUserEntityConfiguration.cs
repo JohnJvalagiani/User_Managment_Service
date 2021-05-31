@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Service.Core.Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,13 +17,7 @@ namespace Infrastructure.Configuration
             builder.HasKey(u => u.Id);
             builder.Property(u => u.FirstName).HasMaxLength(50).IsRequired();
             builder.Property(u => u.LastName).HasMaxLength(50).IsRequired();
-            builder.Property(u => u.IsEmployed).IsRequired();
-            builder.Property(u => u.Salary);
-            builder.Property(u => u.IsEmployed).IsRequired();
             builder.Property(u => u.Email).IsRequired();
-            builder.Property(u => u.IsMarried).IsRequired();
-            builder.Property(u => u.PersonalNumber).IsRequired();
-            builder.Property(u => u.BirthDate).IsRequired();
 
             
         }

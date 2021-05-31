@@ -27,6 +27,7 @@ namespace Service.Server.Installers
                    (opt => opt.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
 
+
             services.AddIdentity<AppUser, IdentityRole>()
             .AddEntityFrameworkStores<UserDbContext>()
             .AddDefaultTokenProviders();

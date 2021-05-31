@@ -1,0 +1,38 @@
+﻿@inject Blazored.LocalStorage.ILocalStorageService localStore
+
+@if (user == null)
+{
+    <div>
+
+        <a href="/Registration">Register</a>
+        <a href="/">Log in</a>
+
+    </div>
+
+}
+else
+{
+    <h4>Hi @user</h4>
+
+}
+
+
+@code
+{
+    private string user { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            user = await localStore.GetItemAsync<string>("email");
+
+        }
+        catch (Exception ex)
+        {
+
+        }
+
+    }
+
+}

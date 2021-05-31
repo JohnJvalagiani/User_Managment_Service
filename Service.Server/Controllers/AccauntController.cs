@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
+using Core.Responses;
 using Core.Services.Abstraction;
 using Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Service.Core.Data.Entities;
 using Service.Server.Services;
 using System;
 using System.Collections.Generic;
@@ -25,12 +25,10 @@ namespace Service.Server.Controllers
         private readonly ILogger<AccauntController> _logger;
         private readonly IMapper _mapper;
         private readonly CurrentUserSupplier _currentUserSupplier;
-        private readonly IRepo _repo;
 
         public AccauntController(CurrentUserSupplier currentUserSupplier,IIdentityService service, IMapper mapper,
-            ILogger<AccauntController> logger,IRepo repo)
+            ILogger<AccauntController> logger)
         {
-            this._repo = repo;
 
             this._mapper = mapper;
 
@@ -43,35 +41,33 @@ namespace Service.Server.Controllers
 
         [AllowAnonymous]
         [HttpPost("Registration")]
-        public async Task<IActionResult> Registration([FromBody] RegisterUser User,string password)
+        public async Task<IActionResult> Registration(TeacherProfileDTO User,string password)
         {
            
 
             _logger.LogInformation("Registration",User);
 
 
-            var addres= _mapper.Map<Address>(User);
-
             var theuser = _mapper.Map<AppUser>(User);
 
-            theuser.Address = addres;
+           
 
-             return  Ok(await  _service.Registration(theuser, password));
+             return  Ok(await  _service.Registration(theuser, User.Password));
 
         }
 
         [AllowAnonymous]
         [HttpPost("Login")]
-        public async Task<IActionResult> Login([FromBody] LoginModel User)
+        public async Task<ActionResult<AuthentificationResult>> Login( LoginDto User)
         {
             _logger.LogInformation("Login", User);
 
 
-            var result = await _service.Login(User.UserName, User.Password);
+            var result = await _service.Login(User.Email, User.Password);
 
             if(result.Success)
             {
-            return Ok(result.Token);
+            return Ok(result);
             }
 
             return Unauthorized();

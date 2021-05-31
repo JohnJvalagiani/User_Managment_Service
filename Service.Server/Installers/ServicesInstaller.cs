@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UserService.Abstraction;
+using UserService.Implementation;
 
 namespace Service.Server.Installers
 {
@@ -21,13 +23,18 @@ namespace Service.Server.Installers
 
             services.AddScoped<UserValidation>();
 
-            services.AddScoped<IRepo, UserRepo>();
-
-            services.AddScoped<AdressValidation>();
+            services.AddScoped(typeof(IRepo<>), typeof(Repo<>));
 
             services.AddScoped<JWTTokenService>();
 
             services.AddScoped<CurrentUserSupplier>();
+
+            services.AddTransient<IMailService, MailService>();
+
+            services.AddScoped<IIdentityService, IdentityService>();
+
+            services.AddScoped<InvoiceService>();
+
         }
     }
 }

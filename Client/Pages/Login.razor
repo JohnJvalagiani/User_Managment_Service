@@ -1,0 +1,112 @@
+﻿@layout LoginLayout
+@page "/"
+@using UserService.Abstraction
+@using UserService.Core.Models
+@using Services.Abstraction;
+@using Dtos;
+@using Client.Services.Implementation;
+
+@inject Blazored.LocalStorage.ILocalStorageService localStore
+
+@inject JwtAuthProvider LoginService;
+
+@inject NavigationManager NavigationManager
+@inject IAccountClient accountClient;
+
+
+
+<div class="card">
+    <h4 class="card-header">Log In</h4>
+    <div class="card-body">
+        <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+
+            <div class="form-group">
+                <label>Email</label>
+                <InputText @bind-Value="model.Email" class="form-control" />
+                <ValidationMessage For="@(() => model.Email)" />
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <InputText @bind-Value="model.Password" type="password" class="form-control" />
+                <ValidationMessage For="@(() => model.Password)" />
+            </div>
+            <button disabled="@loading" class="btn btn-primary" @onclick="SendRequest">
+                @if (loading)
+                {
+                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                }
+                Login
+            </button>
+            <NavLink href="account/login" class="btn btn-link">Cancel</NavLink>
+            <a href="/Registration" class="btn btn-link">Registration</a>
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+
+    private LoginDto model = new LoginDto();
+
+    private bool loading;
+
+    const string noteKey = "note";
+    const string emailKey = "email";
+
+    private async void SendRequest(MouseEventArgs e)
+    {
+        try
+        {
+            if (model.Email == null || model.Password == null)
+            {
+                throw new ArgumentException();
+            }
+
+            var userTokenDTO = await accountClient.LoginAsync(model);
+
+            await localStore.SetItemAsync(noteKey, userTokenDTO.Token);
+
+            await localStore.SetItemAsync(emailKey, model.Email);
+
+            var Content = await localStore.GetItemAsync<string>(noteKey);
+
+            //await LoginService.LoginAsync(userTokenDTO.Token);
+
+            loading = false;
+
+            StateHasChanged();
+
+            NavigationManager.NavigateTo("Index");
+
+
+
+        }
+        catch (Exception ex)
+        {
+
+            NavigationManager.NavigateTo("Error");
+
+        }
+
+
+    }
+
+    private async void OnValidSubmit()
+    {
+
+        // loading = true;
+        //try
+        //{
+
+
+
+        //}
+        //catch (Exception ex)
+        //{
+
+        //    loading = false;
+        //    StateHasChanged();
+        //}
+    }
+}

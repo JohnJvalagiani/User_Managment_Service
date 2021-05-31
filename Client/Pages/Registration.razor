@@ -1,0 +1,112 @@
+﻿@layout LoginLayout
+@page "/Registration"
+@using UserService.Abstraction
+@using UserService.Core.Models
+@using Services.Abstraction;
+@using Dtos;
+@using Client.Services.Implementation;
+
+@inject NavigationManager NavigationManager;
+
+@inject JwtAuthProvider LoginService;
+
+@inject Blazored.LocalStorage.ILocalStorageService localStore
+
+@inject IAccountClient accountClient;
+
+
+
+<div class="card">
+    <h4 class="card-header">Register</h4>
+    <div class="card-body">
+        <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            <div class="form-group">
+                <label>First Name</label>
+                <InputText @bind-Value="model.FirstName" class="form-control" />
+                <ValidationMessage For="@(() => model.FirstName)" />
+            </div>
+            <div class="form-group">
+                <label>Last Name</label>
+                <InputText @bind-Value="model.LastName" class="form-control" />
+                <ValidationMessage For="@(() => model.LastName)" />
+            </div> <div class="form-group">
+                <label>Email</label>
+                <InputText @bind-Value="model.Email" class="form-control" />
+                <ValidationMessage For="@(() => model.Email)" />
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <InputText @bind-Value="model.Password" type="password" class="form-control" />
+                <ValidationMessage For="@(() => model.Password)" />
+            </div>
+            <button disabled="@loading" class="btn btn-primary" @onclick="SendRequest">
+                @if (loading)
+                {
+                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                }
+                Register
+            </button>
+            <NavLink href="account/login" class="btn btn-link">Cancel</NavLink>
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+
+
+    private TeacherProfileDTO model = new TeacherProfileDTO();
+
+    private bool loading;
+
+    private async void SendRequest(MouseEventArgs e)
+    {
+        try
+        {
+            model.UserName = model.Email;
+
+            var userTokenDTO = await accountClient.RegisterAsync(model);
+
+
+
+            await LoginService.LoginAsync(userTokenDTO.Token);
+
+            loading = false;
+
+            StateHasChanged();
+
+            NavigationManager.NavigateTo("EditStudent");
+
+
+
+        }
+        catch (Exception)
+        {
+            loading = false;
+
+            StateHasChanged();
+
+        }
+
+
+    }
+
+    private void OnValidSubmit()
+    {
+
+        loading = true;
+        //try
+        //{
+
+        //    // var result = await userservice.Registration(new AppUser {UserName=model.Email,Email = model.Email, },model.Password);
+
+        //}
+        //catch (Exception ex)
+        //{
+
+        //    loading = false;
+        //    StateHasChanged();
+        //}
+    }
+}
