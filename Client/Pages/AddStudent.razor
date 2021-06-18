@@ -1,6 +1,10 @@
 ﻿@page "/AddStudent"
 
-@inject IHttpService httpservice;
+@using Client.Services.Abstraction;
+
+@inject IStudentsService studentservice;
+@inject Blazored.LocalStorage.ILocalStorageService localStore
+
 
 @using Dtos;
 @using Client.Services;
@@ -47,11 +51,13 @@
 
     private StudentDto model = new StudentDto();
 
-    private void SendRequest()
+    const string noteKey = "token";
+
+    private async Task SendRequest()
     {
+        var Content = await localStore.GetItemAsync<string>(noteKey);
 
-
-        httpservice.Post<ReadStudentDto ,StudentDto>(StudentEndpoints.AddStudent, model);
+        await studentservice.Addstudent(model, Content);
 
     }
 

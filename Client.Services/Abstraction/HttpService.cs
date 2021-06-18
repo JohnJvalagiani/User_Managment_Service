@@ -66,7 +66,7 @@ namespace Client.Services
 
                 var result = await _httpClient.PostAsync(Url, jsonDataStringContent);
 
-                var theres = await Deserialize<TRespons>(result, DefaultJsonSerializerOptions);
+                    var theres = await Deserialize<TRespons>(result, DefaultJsonSerializerOptions);
 
                 return theres;
 

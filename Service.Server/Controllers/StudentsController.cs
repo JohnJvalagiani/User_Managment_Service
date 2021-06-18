@@ -15,6 +15,7 @@ namespace Service.Server.Controllers
 {
 
     
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class StudentsController: ControllerBase
@@ -39,19 +40,23 @@ namespace Service.Server.Controllers
 
             var thestudent =_mapper.Map<Student>(studentDto);
 
+
+
             var result = await _repo.Add(thestudent);
 
             return Ok(result);
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        
         [HttpGet("GetAllStudents")]
         public async Task<IActionResult> GetAllStudents()
         {
+            var result = await _repo.GetAll();
 
-            return Ok(new List<ReadStudentDto> { new ReadStudentDto { FirstName = "John" }, new ReadStudentDto { FirstName = "Lado" }, new ReadStudentDto { FirstName = "Nick" } });
+            var theresult=result.Select(s => _mapper.Map<ReadStudentDto>(s)).AsEnumerable();
 
-           //await _repo.GetAll()
+            return Ok(theresult);
+
         }
 
 

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Domain.Entities;
 using Dtos;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,12 @@ namespace service.server.Profiles
         {
             CreateMap<AppUser, TeacherProfileDTO>();
             CreateMap<TeacherProfileDTO, AppUser>();
+
+            CreateMap<ReadStudentDto, Student>();
+            CreateMap<Student, ReadStudentDto>();
+
+            CreateMap<Student, StudentDto>();
+            CreateMap<StudentDto,Student>();
 
         }
 

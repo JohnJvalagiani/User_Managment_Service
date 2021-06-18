@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Blazored.LocalStorage;
+using System.Net.Http.Headers;
 
 namespace Client.Services.Implementation
 {
@@ -42,10 +43,15 @@ namespace Client.Services.Implementation
          
         public async Task<ReadStudentDto> Addstudent(StudentDto data,string token)
         {
-            var requestMessage = new HttpRequestMessage(HttpMethod.Get, StudentEndpoints.GetAllStudent);
 
 
-            requestMessage.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var jsonData = JsonSerializer.Serialize(data);
+
+            var jsonDataStringContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            await _httpClient.PostAsync(StudentEndpoints.AddStudent,jsonDataStringContent);
 
             var result = await _httpService.Post<ReadStudentDto,StudentDto>(StudentEndpoints.AddStudent,data);
 

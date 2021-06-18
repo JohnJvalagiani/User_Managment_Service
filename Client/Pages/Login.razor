@@ -51,7 +51,7 @@
 
     private bool loading;
 
-    const string noteKey = "note";
+    const string noteKey = "token";
     const string emailKey = "email";
 
     private async void SendRequest(MouseEventArgs e)
@@ -71,8 +71,7 @@
 
             var Content = await localStore.GetItemAsync<string>(noteKey);
 
-            //await LoginService.LoginAsync(userTokenDTO.Token);
-
+            
             loading = false;
 
             StateHasChanged();
@@ -98,8 +97,6 @@
         // loading = true;
         //try
         //{
-
-
 
         //}
         //catch (Exception ex)
